@@ -1,17 +1,69 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.wyf.mapper.CategoryMapper" >
-  <resultMap id="BaseResultMap" type="com.wyf.popj.Category" >
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" property="id" jdbcType="INTEGER" />
-    <result column="name" property="name" jdbcType="VARCHAR" />
-    <result column="type" property="type" jdbcType="INTEGER" />
-    <result column="father_id" property="fatherId" jdbcType="INTEGER" />
-    <result column="logo" property="logo" jdbcType="VARCHAR" />
-    <result column="slogan" property="slogan" jdbcType="VARCHAR" />
-    <result column="cat_image" property="catImage" jdbcType="VARCHAR" />
-    <result column="bg_color" property="bgColor" jdbcType="VARCHAR" />
-  </resultMap>
+<mapper namespace="com.wyf.mapper.CategoryMapper">
+
+    <!--selectAllGradeById 对应XML-->
+    <resultMap id="selectAllGradeMap" type="com.wyf.popj.vo.SelectAllGrade">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="fatherId" property="fatherId"/>
+
+        <collection property="subCatList" ofType="com.wyf.popj.vo.SubCategoryVO">
+            <id column="subId" property="subId"/>
+            <result column="subName" property="subName"/>
+            <result column="subType" property="subType"/>
+            <result column="subFatherId" property="subFatherId"/>
+        </collection>
+    </resultMap>
+
+    <!--selectSixNewItemsById 对应XML-->
+    <resultMap id="SixItemMap" type="com.wyf.popj.vo.SixItemsVo">
+        <id column="rootCatId" property="rootCatId"/>
+        <result column="rootCatName" property="rootCatName"/>
+        <result column="slogan" property="slogan"/>
+        <result column="catImage" property="catImage"/>
+        <result column="bgColor" property="bgColor"/>
+
+        <collection property="simpleItemList" ofType="com.wyf.popj.vo.SixItemImageVo">
+            <id column="itemId" property="itemId"/>
+            <result column="itemName" property="itemName"/>
+            <result column="itemUrl" property="itemUrl"/>
+        </collection>
+    </resultMap>
+
+    <!--根据父ID查询 六条Item表的数据-->
+    <select id="selectSixItemsByRootCatId" resultMap="SixItemMap" parameterType="Integer">
+        SELECT f.id           AS rootCatId,
+               f.name         AS rootCatName,
+               f.slogan       AS slogan,
+               f.cat_image    AS catImage,
+               f.bg_color     AS bgColor,
+               i.id           AS itemId,
+               i.item_name      AS itemName,
+               ii.url         AS itemUrl,
+               i.created_time AS createdTime
+        FROM `category` f
+                 LEFT JOIN items i ON f.id = i.root_cat_id
+                 LEFT JOIN items_img ii ON i.id = ii.item_id
+        WHERE f.type = 1
+          AND i.root_cat_id = #{rootCatId}
+          AND ii.is_main = 1
+        ORDER BY i.created_time DESC LIMIT 0,6
+    </select>
+
+    <!--根据一级ID查询所有的子类-->
+    <select id="selectAllGradeById" resultMap="selectAllGradeMap" parameterType="Integer">
+        SELECT f.id        AS id,
+               f.`name`    AS `name`,
+               f.type      AS type,
+               f.father_id AS fatherId,
+               c.id        AS subId,
+               c.`name`    AS subName,
+               c.type      AS subType,
+               c.father_id AS subFatherId
+        FROM category f
+                 LEFT JOIN category c ON f.id = c.father_id
+        where f.father_id = ${id}
+    </select>
 </mapper>

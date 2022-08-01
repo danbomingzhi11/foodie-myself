@@ -24,5 +24,12 @@
             <artifactId>foodie-myself-popj</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+
+        <!--导入common引用-->
+        <dependency>
+            <groupId>com.wyf</groupId>
+            <artifactId>foodie-myself-common</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

@@ -1,0 +1,10 @@
+com\wyf\es\pojo\Stu.class
+com\wyf\service\impl\ItemsESServiceImpl$1.class
+com\wyf\service\ItemsESService.class
+com\wyf\config\CorsConfig.class
+com\wyf\config\ESConfig.class
+com\wyf\SearchApplication.class
+com\wyf\WarStarterApplication.class
+com\wyf\controller\ItemsController.class
+com\wyf\service\impl\ItemsESServiceImpl.class
+com\wyf\es\pojo\Items.class

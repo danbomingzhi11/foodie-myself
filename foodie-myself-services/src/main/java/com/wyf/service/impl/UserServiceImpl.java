@@ -24,6 +24,8 @@ public class UserServiceImpl implements UserService {
     @Autowired
     UsersMapper usersMapper;
 
+
+    //自定义的userBO 用于注册使用
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
     public Users createUser(UserBo userBo) {
@@ -56,6 +58,7 @@ public class UserServiceImpl implements UserService {
         return users;
     }
 
+    //根据 username 判断数据库是否已经存在用户
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public Boolean IsExistByUsername(String username) {
@@ -72,6 +75,8 @@ public class UserServiceImpl implements UserService {
 
     }
 
+
+    //登录逻辑 验证用户名跟密码
     @Override
     @Transactional(propagation = Propagation.SUPPORTS)
     public Users checkForLogin(UserBo userBo) throws Exception {

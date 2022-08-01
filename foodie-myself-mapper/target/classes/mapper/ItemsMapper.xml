@@ -1,18 +1,75 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.wyf.mapper.ItemsMapper" >
-  <resultMap id="BaseResultMap" type="com.wyf.popj.Items" >
-    <!--
-      WARNING - @mbg.generated
-    -->
-    <id column="id" property="id" jdbcType="VARCHAR" />
-    <result column="item_name" property="itemName" jdbcType="VARCHAR" />
-    <result column="cat_id" property="catId" jdbcType="INTEGER" />
-    <result column="root_cat_id" property="rootCatId" jdbcType="INTEGER" />
-    <result column="sell_counts" property="sellCounts" jdbcType="INTEGER" />
-    <result column="on_off_status" property="onOffStatus" jdbcType="INTEGER" />
-    <result column="created_time" property="createdTime" jdbcType="TIMESTAMP" />
-    <result column="updated_time" property="updatedTime" jdbcType="TIMESTAMP" />
-    <result column="content" property="content" jdbcType="LONGVARCHAR" />
-  </resultMap>
+<mapper namespace="com.wyf.mapper.ItemsMapper">
+
+    <select id="selectCatsByKeywordsAndSort" resultType="com.wyf.popj.vo.SearchItemsVO" parameterType="map">
+        SELECT f.id AS itemId,
+        f.item_name AS itemName,
+        f.sell_counts AS sellCounts,
+        i.url AS imgUrl,
+        ii.price AS price
+        FROM items f
+        LEFT JOIN items_img i ON f.id = i.item_id
+        LEFT JOIN (SELECT k.item_id, MIN(k.price_discount) as price FROM items_spec k GROUP BY item_id) ii
+        ON f.id = ii.item_id
+        WHERE i.is_main = 1
+        <if test="paramsMap.keyWords != null and paramsMap.keyWords != ''">
+            AND f.item_name LIKE '%${paramsMap.keyWords}%'
+        </if>
+        order by
+        <choose>
+            <when test="paramsMap.sort == &quot;c&quot;">
+                f.sell_counts desc
+            </when>
+            <when test="paramsMap.sort == &quot;p&quot;">
+                ii.price asc
+            </when>
+            <otherwise>
+                f.item_name asc
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectCatsByCatIdAndSort" resultType="com.wyf.popj.vo.SearchItemsVO" parameterType="map">
+        SELECT f.id AS itemId,
+        f.item_name AS itemName,
+        f.sell_counts AS sellCounts,
+        i.url AS imgUrl,
+        ii.price AS price
+        FROM items f
+        LEFT JOIN items_img i ON f.id = i.item_id
+        LEFT JOIN (SELECT k.item_id, MIN(k.price_discount) as price FROM items_spec k GROUP BY item_id) ii
+        ON f.id = ii.item_id
+        WHERE i.is_main = 1
+        <if test="paramsMap.keyWords != null and paramsMap.keyWords != ''">
+            AND f.cat_id = #{paramsMap.catId}
+        </if>
+        order by
+        <choose>
+            <when test="paramsMap.sort == &quot;c&quot;">
+                f.sell_counts desc
+            </when>
+            <when test="paramsMap.sort == &quot;p&quot;">
+                ii.price asc
+            </when>
+            <otherwise>
+                f.item_name asc
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="selectCartsBySpecId" resultType="com.wyf.popj.vo.ShopCartVO" parameterType="String">
+        SELECT i.id             AS itemId,
+               i.item_name      AS itemName,
+               ii.url           AS itemImgUrl,
+               f.id             AS specId,
+               f.`name`         AS specName,
+               f.price_discount AS priceDiscount,
+               f.price_normal   AS priceNormal
+        FROM items_spec f
+                 LEFT JOIN items i ON f.item_id = i.id
+                 LEFT JOIN items_img ii ON f.item_id = ii.item_id
+        WHERE ii.is_main = 1
+          AND f.id = #{specId}
+    </select>
 </mapper>
